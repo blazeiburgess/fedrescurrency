@@ -7,14 +7,15 @@ class FederalreserveSpider(scrapy.Spider):
     start_urls = ['http://federalreserve.gov/']
 
     def parse(self, response):
-        urls = list(map(response.urljoin, response.xpath('//table[@class="statistics"]/tbody/tr/th/a/@href')))
-        if len(urls) == 0:
-            for rate in response.xpath('//table[@class="statistics"]/tr'):
-                yield {
-                    "country": response.xpath('//h3/text()'),
-                    "date": rate.xpath('//th/text()'),
-                    "rate": rate.xpath('//td/text()')
+        for url in response.xpath('//table[@class="statistics"]/tbody/tr/th/a/@href'):
+            yield scrapy.Request(response.urljoin(href), callback=self.parse_rates)
+            
+    def parse_rates(self, response):
+        for rate in response.xpath('//table[@class="statistics"]/tr'):
+            yield {
+                "country": response.xpath('//h3/text()'),
+                "date": rate.xpath('//th/text()'),
+                "rate": rate.xpath('//td/text()')
                 }
-        else:
-            for url in urls:
-                yield scrapy.Request(url, callback=self.parse)
+
+
