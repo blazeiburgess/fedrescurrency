@@ -6,6 +6,9 @@ class FederalreserveSpider(scrapy.Spider):
     allowed_domains = ["federalreserve.gov"]
     start_urls = ['https://www.federalreserve.gov/releases/h10/hist/']
 
+    def clean_country(self, txt):
+        return txt.replace("Historical Rates for the ", "")
+
     # main `parse` method pulls in urls where data is stored
     def parse(self, response):
         hrefs = response.xpath('//table[@class="statistics"]/tr/th/a/@href').extract()
@@ -22,7 +25,7 @@ class FederalreserveSpider(scrapy.Spider):
     def parse_rates(self, response):
         for rate in response.xpath('//table[@class="statistics"]/tr'):
             yield {
-                "country": response.xpath('//h3/text()').extract_first().strip(),
+                "country": clean_country(response.xpath('//h3/text()').extract_first().strip()),
                 "date": rate.xpath('th/text()').extract_first().strip(),
                 "rate": rate.xpath('td/text()').extract_first().strip()
                 }
