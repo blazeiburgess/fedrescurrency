@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import re
 
 class FederalreserveSpider(scrapy.Spider):
     name = "federalreserve"
-    # allowed_domains = ["federalreserve.gov"]
+    allowed_domains = ["federalreserve.gov"]
     start_urls = ['https://www.federalreserve.gov/releases/h10/hist/']
-
-    def clean_data(self, txt):
-        return re.sub('^\s+', '', txt)
 
     def parse(self, response):
         for href in response.xpath('//table[@class="statistics"]/tr/th/a/@href').extract():
