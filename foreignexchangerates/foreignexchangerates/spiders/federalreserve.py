@@ -25,7 +25,7 @@ class FederalreserveSpider(scrapy.Spider):
     def parse_rates(self, response):
         for rate in response.xpath('//table[@class="statistics"]/tr'):
             yield {
-                "country": clean_country(response.xpath('//h3/text()').extract_first().strip()),
+                "currency": self.clean_country(response.xpath('//h3/text()').extract_first().strip()),
                 "date": rate.xpath('th/text()').extract_first().strip(),
                 "rate": rate.xpath('td/text()').extract_first().strip()
                 }
