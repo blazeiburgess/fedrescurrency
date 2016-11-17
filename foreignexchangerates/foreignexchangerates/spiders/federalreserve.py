@@ -6,10 +6,19 @@ class FederalreserveSpider(scrapy.Spider):
     allowed_domains = ["federalreserve.gov"]
     start_urls = ['https://www.federalreserve.gov/releases/h10/hist/']
 
+    # main `parse` method pulls in urls where data is stored
     def parse(self, response):
-        for href in response.xpath('//table[@class="statistics"]/tr/th/a/@href').extract():
+        hrefs = response.xpath('//table[@class="statistics"]/tr/th/a/@href').extract()
+
+        # handles if the <th> country column is switched/made into a <td> 
+        if len(hrefs) == 0:
+            hrefs = response.xpath('//table[@class="statistics"]/tr/td/a/@href').extract()
+            
+        # takes pulled urls and uses them to yield results from the `parse_rates` method
+        for href in hrefs:
             yield scrapy.Request(response.urljoin(href), callback=self.parse_rates)
             
+    # parser that specifically handles the desired data
     def parse_rates(self, response):
         for rate in response.xpath('//table[@class="statistics"]/tr'):
             yield {
